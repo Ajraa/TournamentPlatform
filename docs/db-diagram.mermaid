@@ -1,0 +1,142 @@
+
+erDiagram
+
+%% ==========================================
+%% ČÍSELNÍKY
+%% ==========================================
+
+    user_role {
+        int id PK
+        varchar code
+        varchar description
+    }
+
+    team_type {
+        int id PK
+        varchar code
+        varchar description
+    }
+
+    payment_type {
+        int id PK
+        varchar code
+        varchar description
+    }
+
+%% ==========================================
+%% HLAVNÍ ENTITY
+%% ==========================================
+
+    user {
+        int user_id PK
+        varchar first_name
+        varchar last_name
+        varchar nickname
+        varchar email
+        varchar password_hash
+        int rating
+        float winrate
+        varchar street
+        varchar city
+        varchar postcode
+        varchar country
+        varchar house_number
+        varchar bank_number
+    }
+
+    team {
+        int team_id PK
+        varchar name
+        varchar tag
+        int rating
+        int type_id FK
+        int captain_id FK
+    }
+
+    tournament {
+        int tournament_id PK
+        varchar name
+        datetime start_time
+        decimal prize
+        decimal price
+        int minimal_rating
+        int maximal_rating
+        int minimal_team_amount
+        int maximal_team_amount
+        int founder_id FK
+        int winner_team_id FK
+    }
+
+    match {
+        int match_id PK
+        varchar match_state
+        int tournament_id FK
+        int winner_team_id FK
+    }
+
+    payment_transaction {
+        int transaction_id PK
+        int user_id FK
+        int tournament_id FK
+        decimal amount
+        int type_id FK
+        varchar status
+        datetime created_at
+        datetime completed_at
+    }
+
+%% ==========================================
+%% VAZEBNÍ TABULKY
+%% ==========================================
+
+    user_has_role {
+        int user_id FK
+        int role_id FK
+    }
+
+    user_team {
+        int user_id FK
+        int team_id FK
+        datetime joined_at
+        datetime left_at
+    }
+
+    team_tournament {
+        int team_id FK
+        int tournament_id FK
+        datetime joined_at
+    }
+
+    team_match {
+        int team_id FK
+        int match_id FK
+    }
+
+%% ==========================================
+%% RELACE
+%% ==========================================
+
+    user ||--o{ user_has_role : "má"
+    user_role ||--o{ user_has_role : "přiřazena"
+
+    team ||--|| team_type : "je typu"
+    team }o--|| user : "kapitán"
+
+    tournament }o--|| user : "zakladatel"
+    tournament }o--o| team : "vítěz"
+
+    match }o--|| tournament : "patří do"
+    match }o--o| team : "vítěz"
+
+    payment_transaction }o--|| user : "platí"
+    payment_transaction }o--o| tournament : "váže se na"
+    payment_transaction }o--|| payment_type : "je typu"
+
+    user ||--o{ user_team : "člen"
+    team ||--o{ user_team : "má členy"
+
+    team ||--o{ team_tournament : "účastní se"
+    tournament ||--o{ team_tournament : "obsahuje"
+
+    team ||--o{ team_match : "hraje"
+    match ||--o{ team_match : "obsahuje"
