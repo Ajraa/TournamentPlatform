@@ -1,0 +1,64 @@
+---
+id: 7ef447cf-4a09-464a-ae61-cf393d40e374
+---
+flowchart TD
+    Client([Klientská Web/Mobilní Aplikace])
+
+    subgraph Infra ["Infrastruktura (Docker / AWS)"]
+        Gateway[API Gateway / Load Balancer]
+
+        subgraph Sluzby ["Služby"]
+            direction LR
+            SpringApp["Spring Boot (Core API)<br/>Správa uživatelů a turnajů"]
+            MicronautApp["Micronaut (Payment API)<br/>Zpracování plateb"]
+        end
+
+        subgraph BrokerCache ["Broker & Cache"]
+            RabbitMQ{{"RabbitMQ (Message Broker)"}}
+            Redis[("Redis (Cache & Sessions)")]
+        end
+
+        subgraph Databases ["PostgreSQL Databáze"]
+            direction LR
+            DB_Core[("Schéma: tournament_core<br/>(Jen pro Spring)")]
+            DB_Payment[("Schéma: payment_billing<br/>(Jen pro Micronaut)")]
+        end
+    end
+
+    ExtPayment["Externí Platební Brána<br/>(Stripe, GoPay, PayPal)"]
+
+    %% Klientská vrstva
+    Client -- "REST/JSON" --> Gateway
+
+    %% Směrování (Routing)
+    Gateway -- "/api/users, /api/tournaments" --> SpringApp
+    Gateway -- "/api/payments, webhooks" --> MicronautApp
+
+    %% Spring Boot - Závislosti
+    SpringApp -- "Čtení / Zápis" --> DB_Core
+    SpringApp -- "Session, Žebříčky" --> Redis
+    
+    %% Micronaut - Závislosti
+    MicronautApp -- "Čtení / Zápis transakcí" --> DB_Payment
+    MicronautApp -- "Iniciace platby" --> ExtPayment
+    ExtPayment -- "Webhook (Platba dokončena)" --> Gateway
+
+    %% Asynchronní komunikace přes RabbitMQ
+    SpringApp -- "Publikuje událost<br/>(CheckoutRequestedEvent)" --> RabbitMQ
+    RabbitMQ -- "Konzumuje událost" --> MicronautApp
+
+    MicronautApp -- "Publikuje událost<br/>(PaymentCompletedEvent)" --> RabbitMQ
+    RabbitMQ -- "Konzumuje událost" --> SpringApp
+
+    %% Stylování kódů pro přehlednost
+    classDef spring fill:#6db33f,stroke:#333,stroke-width:2px,color:#fff;
+    classDef micronaut fill:#000000,stroke:#333,stroke-width:2px,color:#fff;
+    classDef db fill:#336791,stroke:#333,stroke-width:2px,color:#fff;
+    classDef broker fill:#ff6600,stroke:#333,stroke-width:2px,color:#fff;
+    classDef cache fill:#dc382d,stroke:#333,stroke-width:2px,color:#fff;
+
+    class SpringApp spring;
+    class MicronautApp micronaut;
+    class DB_Core,DB_Payment db;
+    class RabbitMQ broker;
+    class Redis cache;
