@@ -1,0 +1,168 @@
+---
+id: class-diagram
+---
+classDiagram
+    namespace user {
+        class User {
+            +Long id
+            +String firstName
+            +String lastName
+            +String nickname
+            +String email
+            +String passwordHash
+            +int rating
+            +float winrate
+            +String street
+            +String city
+            +String postcode
+            +String country
+            +String houseNumber
+            +String bankNumber
+            +Set~UserRole~ roles
+        }
+
+        class UserRole {
+            <<enumeration>>
+            PLAYER
+            FOUNDER
+            ADMIN
+        }
+    }
+
+    namespace team {
+        class Team {
+            +Long id
+            +String name
+            +String tag
+            +int rating
+            +TeamType type
+            +Long captainId
+        }
+
+        class TeamType {
+            <<enumeration>>
+            TEAM
+            SOLO
+        }
+
+        class UserTeam {
+            +Long userId
+            +Long teamId
+            +LocalDateTime joinedAt
+            +LocalDateTime leftAt
+        }
+    }
+
+    namespace tournament {
+        class Tournament {
+            +Long id
+            +String name
+            +LocalDateTime startTime
+            +BigDecimal prize
+            +BigDecimal price
+            +Integer minimalRating
+            +Integer maximalRating
+            +Integer playersPerTeam
+            +Integer minimalTeamAmount
+            +Integer maximalTeamAmount
+            +Long founderId
+            +Long winnerTeamId
+        }
+
+        class Match {
+            +Long id
+            +MatchState state
+            +Long tournamentId
+            +Long winnerTeamId
+        }
+
+        class MatchState {
+            <<enumeration>>
+            WAITING
+            RUNNING
+            FINISHED
+        }
+
+        class TeamTournament {
+            +Long teamId
+            +Long tournamentId
+            +LocalDateTime joinedAt
+        }
+
+        class TeamMatch {
+            +Long teamId
+            +Long matchId
+        }
+    }
+
+    namespace payment_micronaut {
+        class PaymentTransaction {
+            +Long id
+            +Long userId
+            +Long tournamentId
+            +BigDecimal amount
+            +PaymentType type
+            +PaymentStatus status
+            +LocalDateTime createdAt
+            +LocalDateTime completedAt
+        }
+
+        class PaymentType {
+            +Long id
+            +String code
+            +String description
+        }
+
+        class PaymentStatus {
+            <<enumeration>>
+            PENDING
+            COMPLETED
+            FAILED
+            REFUNDED
+        }
+    }
+
+    namespace events {
+        class CheckoutRequestedEvent {
+            +Long userId
+            +Long tournamentId
+            +BigDecimal amount
+        }
+
+        class PaymentCompletedEvent {
+            +Long transactionId
+            +Long userId
+            +Long tournamentId
+            +PaymentStatus status
+        }
+    }
+
+    %% user module
+    User "1" --> "*" UserRole : has roles
+
+    %% team module - interní asociace
+    Team --> TeamType : is of type
+    %% cross-module reference přes ID
+    Team "1" ..> "1" User : captainId
+    UserTeam "*" ..> "1" User : userId
+    UserTeam "*" ..> "1" Team : teamId
+
+    %% tournament module - interní asociace
+    Match --> MatchState
+    Match "*" --> "1" Tournament : tournamentId (interní)
+    TeamTournament "*" --> "1" Tournament : tournamentId (interní)
+    TeamMatch "*" --> "1" Match : matchId (interní)
+    %% cross-module reference přes ID
+    Tournament "*" ..> "1" User : founderId
+    Tournament "*" ..> "0..1" Team : winnerTeamId
+    Match "*" ..> "0..1" Team : winnerTeamId
+    TeamTournament "*" ..> "1" Team : teamId
+    TeamMatch "*" ..> "1" Team : teamId
+
+    %% payment_micronaut - pouze cross-service reference přes ID
+    PaymentTransaction --> PaymentType
+    PaymentTransaction --> PaymentStatus
+
+    %% RabbitMQ events
+    CheckoutRequestedEvent ..> PaymentTransaction : triggers creation
+    PaymentCompletedEvent ..> PaymentTransaction : originated from

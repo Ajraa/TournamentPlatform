@@ -1,4 +1,4 @@
-package spring;
+package cz.ajraa.tournament;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

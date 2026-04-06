@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tournament_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: tournament-platform
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: tournament_broker
+    ports:
+      - "5672:5672"   # Port pro komunikaci aplikací (Spring/Micronaut)
+      - "15672:15672" # Webové rozhraní (Admin panel)
+    restart: unless-stopped
+
+volumes:
+  pg_data:
