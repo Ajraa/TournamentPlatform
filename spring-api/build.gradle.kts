@@ -28,6 +28,7 @@ dependencies {
     implementation("org.springframework.modulith:spring-modulith-events-api")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
