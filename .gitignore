@@ -1,0 +1,6 @@
+# Gradle cache
+.gradle/
+build/
+
+# Wrapper (JAR se ponechává, ale nic jiného)
+!gradle/wrapper/gradle-wrapper.jar
