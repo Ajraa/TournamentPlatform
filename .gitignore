@@ -1,6 +1,8 @@
 # Gradle cache
 .gradle/
 build/
+.idea/
+gradle/
 
 # Wrapper (JAR se ponechává, ale nic jiného)
 !gradle/wrapper/gradle-wrapper.jar
