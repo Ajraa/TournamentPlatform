@@ -8,10 +8,14 @@ Base path: `/api/v1`
 
 ### POST /api/v1/auth/register
 
-Registers a new user account.
+Registers a new user account. The `role` field is optional and defaults to `PLAYER`.
 
 - **Auth:** Public
 - **Status:** `201 Created` | `400 Bad Request`
+
+#### Role: PLAYER (default)
+
+Required fields: `email`, `username`, `password`. A solo user team is automatically created for the new player.
 
 **Request body**
 
@@ -19,15 +23,42 @@ Registers a new user account.
 {
   "email": "hrac@example.com",
   "password": "SuperTajneHeslo123",
-  "username": "ProGamer42"
+  "username": "ProGamer42",
+  "role": "PLAYER"
 }
 ```
 
-| Field      | Type   | Constraints                        |
-|------------|--------|------------------------------------|
-| `email`    | string | Required, valid email format       |
-| `password` | string | Required, min 8 characters         |
-| `username` | string | Required                           |
+#### Role: FOUNDER
+
+Required fields: `email`, `username`, `password`, `firstName`, `lastName`, `address`, `bankAccount`. No team is created automatically.
+
+**Request body**
+
+```json
+{
+  "email": "founder@example.com",
+  "password": "SuperTajneHeslo123",
+  "username": "TournamentOrg",
+  "role": "FOUNDER",
+  "firstName": "Jan",
+  "lastName": "Novák",
+  "address": "Náměstí Míru 1, 120 00 Praha",
+  "bankAccount": "1234567890/0800"
+}
+```
+
+#### Field reference
+
+| Field         | Type   | Constraints                                      |
+|---------------|--------|--------------------------------------------------|
+| `email`       | string | Required, valid email format                     |
+| `password`    | string | Required, min 8 characters                       |
+| `username`    | string | Required                                         |
+| `role`        | string | Optional, `PLAYER` (default) or `FOUNDER`        |
+| `firstName`   | string | Required when `role = FOUNDER`                   |
+| `lastName`    | string | Required when `role = FOUNDER`                   |
+| `address`     | string | Required when `role = FOUNDER`                   |
+| `bankAccount` | string | Required when `role = FOUNDER`                   |
 
 **Response body** (`201`)
 
@@ -36,15 +67,15 @@ Registers a new user account.
   "id": 1,
   "email": "hrac@example.com",
   "username": "ProGamer42",
-  "role": "USER"
+  "role": "PLAYER"
 }
 ```
 
 **Error responses**
 
-| Status | Condition              |
-|--------|------------------------|
-| `400`  | Email already in use or validation failed |
+| Status | Condition                                                          |
+|--------|--------------------------------------------------------------------|
+| `400`  | Email already in use, validation failed, or founder fields missing |
 
 ---
 
@@ -171,12 +202,12 @@ Returns the public profile of any user. Email and other sensitive fields are int
 
 ## DTOs
 
-| DTO                   | Used in                        | Fields                                              |
-|-----------------------|--------------------------------|-----------------------------------------------------|
-| `UserRegistrationDto` | `POST /auth/register` request  | `email`, `password`, `username`                     |
-| `LoginRequestDto`     | `POST /auth/login` request     | `email`, `password`                                 |
-| `AuthResponseDto`     | `POST /auth/login` response    | `token`                                             |
-| `UserResponseDto`     | `POST /auth/register` response | `id`, `email`, `username`, `role`                   |
-| `UserProfileDto`      | `GET/PUT /users/me` response   | `id`, `email`, `username`, `registeredAt`           |
-| `UpdateProfileDto`    | `PUT /users/me` request        | `username`                                          |
-| `PublicUserDto`       | `GET /users/{userId}` response | `id`, `username`, `joinedAt`                        |
+| DTO                   | Used in                        | Fields                                                                                              |
+|-----------------------|--------------------------------|-----------------------------------------------------------------------------------------------------|
+| `UserRegistrationDto` | `POST /auth/register` request  | `email`, `password`, `username`, `role`; + `firstName`, `lastName`, `address`, `bankAccount` for FOUNDER |
+| `LoginRequestDto`     | `POST /auth/login` request     | `email`, `password`                                                                                 |
+| `AuthResponseDto`     | `POST /auth/login` response    | `token`                                                                                             |
+| `UserResponseDto`     | `POST /auth/register` response | `id`, `email`, `username`, `role`                                                                   |
+| `UserProfileDto`      | `GET/PUT /users/me` response   | `id`, `email`, `username`, `registeredAt`                                                           |
+| `UpdateProfileDto`    | `PUT /users/me` request        | `username`                                                                                          |
+| `PublicUserDto`       | `GET /users/{userId}` response | `id`, `username`, `joinedAt`                                                                        |
