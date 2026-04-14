@@ -34,7 +34,7 @@ public class User {
     private String bankNumber;
     @ManyToMany(fetch =  FetchType.LAZY)
     @JoinTable(
-            name = "user_roles",
+            name = "user_has_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )

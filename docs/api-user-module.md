@@ -42,7 +42,11 @@ Required fields: `email`, `username`, `password`, `firstName`, `lastName`, `addr
   "role": "FOUNDER",
   "firstName": "Jan",
   "lastName": "Novák",
-  "address": "Náměstí Míru 1, 120 00 Praha",
+  "street": "Náměstí Míru",
+  "houseNumber": "1",
+  "city": "Praha",
+  "postcode": "12000",
+  "country": "CZ",
   "bankAccount": "1234567890/0800"
 }
 ```
@@ -57,7 +61,11 @@ Required fields: `email`, `username`, `password`, `firstName`, `lastName`, `addr
 | `role`        | string | Optional, `PLAYER` (default) or `FOUNDER`        |
 | `firstName`   | string | Required when `role = FOUNDER`                   |
 | `lastName`    | string | Required when `role = FOUNDER`                   |
-| `address`     | string | Required when `role = FOUNDER`                   |
+| `street`      | string | Required when `role = FOUNDER`                   |
+| `houseNumber` | string | Required when `role = FOUNDER`                   |
+| `city`        | string | Required when `role = FOUNDER`                   |
+| `postcode`    | string | Required when `role = FOUNDER`                   |
+| `country`     | string | Required when `role = FOUNDER`                   |
 | `bankAccount` | string | Required when `role = FOUNDER`                   |
 
 **Response body** (`201`)
@@ -204,7 +212,7 @@ Returns the public profile of any user. Email and other sensitive fields are int
 
 | DTO                   | Used in                        | Fields                                                                                              |
 |-----------------------|--------------------------------|-----------------------------------------------------------------------------------------------------|
-| `UserRegistrationDto` | `POST /auth/register` request  | `email`, `password`, `username`, `role`; + `firstName`, `lastName`, `address`, `bankAccount` for FOUNDER |
+| `UserRegistrationDto` | `POST /auth/register` request  | `email`, `password`, `username`, `role`; + `firstName`, `lastName`, `street`, `houseNumber`, `city`, `postcode`, `country`, `bankAccount` for FOUNDER |
 | `LoginRequestDto`     | `POST /auth/login` request     | `email`, `password`                                                                                 |
 | `AuthResponseDto`     | `POST /auth/login` response    | `token`                                                                                             |
 | `UserResponseDto`     | `POST /auth/register` response | `id`, `email`, `username`, `role`                                                                   |
