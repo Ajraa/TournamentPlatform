@@ -1,11 +1,14 @@
 package cz.ajraa.tournament.user;
 
+import cz.ajraa.tournament.common.security.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -16,6 +19,7 @@ class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Transactional
     public AuthResponseDto RegisterUser(UserRegistrationDto dto) throws RegisterException {
@@ -51,5 +55,20 @@ class UserService {
         log.info("Úspěšně zaregistrován nový uživatel s ID: {}", savedUser.getUserId());
 
         return new AuthResponseDto(savedUser.getUserId(), "Registrace proběhla úspěšně");
+    }
+
+    public AuthResponseDto LoginUser(LoginDto dto) {
+        User user = userRepository.findByNickname(dto.getNickname())
+                .orElseThrow(() -> new BadCredentialsException("Špatné jméno nebo heslo."));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash()))
+            throw new BadCredentialsException("Špatné jméno nebo heslo.");
+
+        List<String> roleNames = user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .toList();
+
+        String token = jwtService.GenerateToken(user.getUserId(), roleNames);
+        return new AuthResponseDto(token, "Uživatel přihlášen.");
     }
 }

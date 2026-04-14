@@ -1,0 +1,13 @@
+package cz.ajraa.tournament.user;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginDto {
+    @NotBlank(message = "Nicmane nesmí být prázdný.")
+    private String nickname;
+
+    @NotBlank(message = "Heslo nesmí být prázdné.")
+    private String password;
+}
