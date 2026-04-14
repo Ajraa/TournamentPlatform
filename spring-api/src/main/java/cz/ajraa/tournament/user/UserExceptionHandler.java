@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 
 @Slf4j
-@RestControllerAdvice(basePackages = "cz.ajraa.tournament.user;")
+@RestControllerAdvice(basePackages = "cz.ajraa.tournament.user")
 public class UserExceptionHandler {
 
     @ExceptionHandler(RegisterException.class)
