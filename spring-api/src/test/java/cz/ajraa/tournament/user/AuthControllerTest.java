@@ -18,13 +18,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserControllerTest {
+class AuthControllerTest {
 
     private static final String REGISTER_URL = "/api/v1/auth/register";
     private static final String LOGIN_URL = "/api/v1/auth/login";
 
     @Mock
-    private UserService userService;
+    private AuthService authService;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -32,7 +32,7 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-            .standaloneSetup(new UserController(userService))
+            .standaloneSetup(new AuthController(authService))
             .setControllerAdvice(new UserExceptionHandler(), new GlobalExceptionHandler())
             .build();
     }
@@ -69,7 +69,7 @@ class UserControllerTest {
 
     @Test
     void registerPlayer_validniRequest_vrati201STelemem() throws Exception {
-        when(userService.RegisterUser(any()))
+        when(authService.RegisterUser(any()))
             .thenReturn(new AuthResponseDto(1L, "Registrace proběhla úspěšně"));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -82,7 +82,7 @@ class UserControllerTest {
 
     @Test
     void registerFounder_validniRequest_vrati201() throws Exception {
-        when(userService.RegisterUser(any()))
+        when(authService.RegisterUser(any()))
             .thenReturn(new AuthResponseDto(2L, "Registrace proběhla úspěšně"));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -168,7 +168,7 @@ class UserControllerTest {
 
     @Test
     void register_duplicitniEmail_vrati409SPolemEmail() throws Exception {
-        when(userService.RegisterUser(any()))
+        when(authService.RegisterUser(any()))
             .thenThrow(new RegisterException("email", "Uživatel s tímto emailem již existuje."));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -180,7 +180,7 @@ class UserControllerTest {
 
     @Test
     void register_duplicitniNickname_vrati409SPolemNickname() throws Exception {
-        when(userService.RegisterUser(any()))
+        when(authService.RegisterUser(any()))
             .thenThrow(new RegisterException("nickname", "Uživatel s tímto uživatelským jménem již existuje."));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -212,7 +212,7 @@ class UserControllerTest {
 
     @Test
     void login_validniRequest_vrati200STokenem() throws Exception {
-        when(userService.LoginUser(any()))
+        when(authService.LoginUser(any()))
             .thenReturn(new AuthResponseDto("jwt-token-xyz", "Uživatel přihlášen."));
 
         mockMvc.perform(post(LOGIN_URL)
@@ -227,7 +227,7 @@ class UserControllerTest {
 
     @Test
     void login_spatneUdaje_vrati401SChybou() throws Exception {
-        when(userService.LoginUser(any()))
+        when(authService.LoginUser(any()))
             .thenThrow(new BadCredentialsException("Špatné jméno nebo heslo."));
 
         mockMvc.perform(post(LOGIN_URL)

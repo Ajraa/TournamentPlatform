@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -34,7 +33,7 @@ class UserServiceTest {
     private JwtService jwtService;
 
     @InjectMocks
-    private UserService userService;
+    private AuthService authService;
 
     // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -108,7 +107,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(dto.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        AuthResponseDto result = userService.RegisterUser(dto);
+        AuthResponseDto result = authService.RegisterUser(dto);
 
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getMessage()).isEqualTo("Registrace proběhla úspěšně");
@@ -124,7 +123,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        userService.RegisterUser(dto);
+        authService.RegisterUser(dto);
 
         verify(userRepository).save(argThat(u ->
             "hrac@example.com".equals(u.getEmail()) &&
@@ -144,7 +143,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        userService.RegisterUser(dto);
+        authService.RegisterUser(dto);
 
         verify(userRepository).save(argThat(u ->
             u.getFirstName() == null &&
@@ -164,7 +163,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(userRepository.save(any())).thenReturn(savedUserWithId(2L));
 
-        AuthResponseDto result = userService.RegisterUser(dto);
+        AuthResponseDto result = authService.RegisterUser(dto);
 
         assertThat(result.getUserId()).isEqualTo(2L);
         verify(userRepository).save(argThat(u ->
@@ -186,7 +185,7 @@ class UserServiceTest {
         UserRegistrationDto dto = playerDto();
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(true);
 
-        assertThatThrownBy(() -> userService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.RegisterUser(dto))
             .isInstanceOf(RegisterException.class)
             .hasMessage("Uživatel s tímto emailem již existuje.")
             .satisfies(ex -> assertThat(((RegisterException) ex).getField()).isEqualTo("email"));
@@ -200,7 +199,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(userRepository.existsByNickname(dto.getNickname())).thenReturn(true);
 
-        assertThatThrownBy(() -> userService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.RegisterUser(dto))
             .isInstanceOf(RegisterException.class)
             .hasMessage("Uživatel s tímto uživatelským jménem již existuje.")
             .satisfies(ex -> assertThat(((RegisterException) ex).getField()).isEqualTo("nickname"));
@@ -219,7 +218,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(roleRepository.findByName(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.RegisterUser(dto))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("PLAYER");
 
@@ -237,7 +236,7 @@ class UserServiceTest {
         when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(true);
         when(jwtService.GenerateToken(eq(42L), anyList())).thenReturn("jwt-token-xyz");
 
-        AuthResponseDto result = userService.LoginUser(dto);
+        AuthResponseDto result = authService.LoginUser(dto);
 
         assertThat(result.getToken()).isEqualTo("jwt-token-xyz");
         assertThat(result.getMessage()).isEqualTo("Uživatel přihlášen.");
@@ -254,7 +253,7 @@ class UserServiceTest {
 
         when(userRepository.findByNickname("hrac1")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.LoginUser(dto))
+        assertThatThrownBy(() -> authService.LoginUser(dto))
             .isInstanceOf(BadCredentialsException.class)
             .hasMessage("Špatné jméno nebo heslo.");
 
@@ -270,7 +269,7 @@ class UserServiceTest {
         when(userRepository.findByNickname("hrac1")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(false);
 
-        assertThatThrownBy(() -> userService.LoginUser(dto))
+        assertThatThrownBy(() -> authService.LoginUser(dto))
             .isInstanceOf(BadCredentialsException.class)
             .hasMessage("Špatné jméno nebo heslo.");
 

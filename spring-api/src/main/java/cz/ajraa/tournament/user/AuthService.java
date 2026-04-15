@@ -14,7 +14,7 @@ import java.util.Set;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-class UserService {
+class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
