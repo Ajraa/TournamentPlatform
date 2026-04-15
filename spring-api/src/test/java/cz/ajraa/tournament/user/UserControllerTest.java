@@ -3,6 +3,7 @@ package cz.ajraa.tournament.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.ajraa.tournament.common.exceptions.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
     private static final String REGISTER_URL = "/api/v1/auth/register";
+    private static final String LOGIN_URL = "/api/v1/auth/login";
 
     @Mock
     private UserService userService;
@@ -195,5 +197,76 @@ class UserControllerTest {
         mockMvc.perform(post(REGISTER_URL)
                 .content(objectMapper.writeValueAsString(validPlayerDto())))
             .andExpect(status().isUnsupportedMediaType());
+    }
+
+    // ─── login helpers ─────────────────────────────────────────────────────
+
+    private LoginDto validLoginDto() {
+        LoginDto dto = new LoginDto();
+        dto.setNickname("hrac1");
+        dto.setPassword("heslo123");
+        return dto;
+    }
+
+    // ─── login ─────────────────────────────────────────────────────────────
+
+    @Test
+    void login_validniRequest_vrati200STokenem() throws Exception {
+        when(userService.LoginUser(any()))
+            .thenReturn(new AuthResponseDto("jwt-token-xyz", "Uživatel přihlášen."));
+
+        mockMvc.perform(post(LOGIN_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validLoginDto())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").value("jwt-token-xyz"))
+            .andExpect(jsonPath("$.message").value("Uživatel přihlášen."));
+    }
+
+    // ─── login chyby ───────────────────────────────────────────────────────
+
+    @Test
+    void login_spatneUdaje_vrati401SChybou() throws Exception {
+        when(userService.LoginUser(any()))
+            .thenThrow(new BadCredentialsException("Špatné jméno nebo heslo."));
+
+        mockMvc.perform(post(LOGIN_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validLoginDto())))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error").value("Špatné jméno nebo heslo."));
+    }
+
+    @Test
+    void login_bezContentType_vrati415() throws Exception {
+        mockMvc.perform(post(LOGIN_URL)
+                .content(objectMapper.writeValueAsString(validLoginDto())))
+            .andExpect(status().isUnsupportedMediaType());
+    }
+
+    // ─── login validace – 400 ──────────────────────────────────────────────
+
+    @Test
+    void login_prazdneNickname_vrati400SPolemNickname() throws Exception {
+        LoginDto dto = validLoginDto();
+        dto.setNickname("");
+
+        mockMvc.perform(post(LOGIN_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.invalidFields.nickname").exists());
+    }
+
+    @Test
+    void login_prazdneHeslo_vrati400SPolemPassword() throws Exception {
+        LoginDto dto = validLoginDto();
+        dto.setPassword("");
+
+        mockMvc.perform(post(LOGIN_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.invalidFields.password").exists());
     }
 }

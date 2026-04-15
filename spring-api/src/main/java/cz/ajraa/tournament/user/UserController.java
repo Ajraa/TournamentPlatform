@@ -22,7 +22,7 @@ class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> LoginUser(@RequestBody LoginDto dto) {
+    public ResponseEntity<AuthResponseDto> LoginUser(@Valid @RequestBody LoginDto dto) {
         AuthResponseDto responseDto = userService.LoginUser(dto);
         return ResponseEntity.ok().body(responseDto);
     }

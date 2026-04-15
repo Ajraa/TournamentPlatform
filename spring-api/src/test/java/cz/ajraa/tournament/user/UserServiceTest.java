@@ -1,13 +1,17 @@
 package cz.ajraa.tournament.user;
 
+import cz.ajraa.tournament.common.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,6 +29,9 @@ class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private UserService userService;
@@ -66,6 +73,26 @@ class UserServiceTest {
     private User savedUserWithId(long id) {
         User user = new User();
         user.setUserId(id);
+        return user;
+    }
+
+    private LoginDto loginDto() {
+        LoginDto dto = new LoginDto();
+        dto.setNickname("hrac1");
+        dto.setPassword("heslo123");
+        return dto;
+    }
+
+    private User userWithPassword(String nickname, String hash, RoleType... roles) {
+        User user = new User();
+        user.setUserId(42L);
+        user.setNickname(nickname);
+        user.setPasswordHash(hash);
+        Set<Role> roleSet = new java.util.HashSet<>();
+        for (RoleType rt : roles) {
+            roleSet.add(roleOf(rt));
+        }
+        user.setRoles(roleSet);
         return user;
     }
 
@@ -197,5 +224,56 @@ class UserServiceTest {
             .hasMessageContaining("PLAYER");
 
         verify(userRepository, never()).save(any());
+    }
+
+    // ─── úspěšný login ─────────────────────────────────────────────────────
+
+    @Test
+    void loginUser_spravneUdaje_vratiTokenAZpravu() {
+        LoginDto dto = loginDto();
+        User user = userWithPassword("hrac1", "hashedPassword", RoleType.PLAYER);
+
+        when(userRepository.findByNickname("hrac1")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(true);
+        when(jwtService.GenerateToken(eq(42L), anyList())).thenReturn("jwt-token-xyz");
+
+        AuthResponseDto result = userService.LoginUser(dto);
+
+        assertThat(result.getToken()).isEqualTo("jwt-token-xyz");
+        assertThat(result.getMessage()).isEqualTo("Uživatel přihlášen.");
+        verify(jwtService).GenerateToken(eq(42L), argThat(roleNames ->
+            roleNames.size() == 1 && roleNames.contains("PLAYER")
+        ));
+    }
+
+    // ─── login chyby ───────────────────────────────────────────────────────
+
+    @Test
+    void loginUser_neexistujiciNickname_hodiBadCredentialsException() {
+        LoginDto dto = loginDto();
+
+        when(userRepository.findByNickname("hrac1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.LoginUser(dto))
+            .isInstanceOf(BadCredentialsException.class)
+            .hasMessage("Špatné jméno nebo heslo.");
+
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(jwtService, never()).GenerateToken(any(), any());
+    }
+
+    @Test
+    void loginUser_spatneHeslo_hodiBadCredentialsException() {
+        LoginDto dto = loginDto();
+        User user = userWithPassword("hrac1", "hashedPassword", RoleType.PLAYER);
+
+        when(userRepository.findByNickname("hrac1")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.LoginUser(dto))
+            .isInstanceOf(BadCredentialsException.class)
+            .hasMessage("Špatné jméno nebo heslo.");
+
+        verify(jwtService, never()).GenerateToken(any(), any());
     }
 }
