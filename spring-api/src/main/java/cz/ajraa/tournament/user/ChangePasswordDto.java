@@ -1,0 +1,16 @@
+package cz.ajraa.tournament.user;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class ChangePasswordDto {
+    @NotBlank(message = "Staré heslo nesmí být prázdné.")
+    @Size(min = 8, message = "Staré heslo musí mít alespoň 8 znaků.")
+    private String oldPassword;
+
+    @NotBlank(message = "Nové heslo nesmí být prázdné.")
+    @Size(min = 8, message = "Nové heslo musí mít alespoň 8 znaků.")
+    private String newPassword;
+}

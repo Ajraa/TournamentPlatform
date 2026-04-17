@@ -60,4 +60,18 @@ public class GlobalExceptionHandler {
               ex.getMessage()
         );
     }
+
+    @ExceptionHandler(IllegalUpdateException.class)
+    public ProblemDetail handleIllegalUpdateException(IllegalUpdateException ex)
+    {
+        log.info("Nepovolený update: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Nepovolený update"
+        );
+
+        problemDetail.setProperty("invalidFields", Map.of(ex.getField(), ex.getMessage()));
+        return  problemDetail;
+    }
 }
