@@ -107,7 +107,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(dto.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        AuthResponseDto result = authService.RegisterUser(dto);
+        AuthResponseDto result = authService.registerUser(dto);
 
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getMessage()).isEqualTo("Registrace proběhla úspěšně");
@@ -123,7 +123,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        authService.RegisterUser(dto);
+        authService.registerUser(dto);
 
         verify(userRepository).save(argThat(u ->
             "hrac@example.com".equals(u.getEmail()) &&
@@ -143,7 +143,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(userRepository.save(any())).thenReturn(savedUserWithId(1L));
 
-        authService.RegisterUser(dto);
+        authService.registerUser(dto);
 
         verify(userRepository).save(argThat(u ->
             u.getFirstName() == null &&
@@ -163,7 +163,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(userRepository.save(any())).thenReturn(savedUserWithId(2L));
 
-        AuthResponseDto result = authService.RegisterUser(dto);
+        AuthResponseDto result = authService.registerUser(dto);
 
         assertThat(result.getUserId()).isEqualTo(2L);
         verify(userRepository).save(argThat(u ->
@@ -185,7 +185,7 @@ class AuthServiceTest {
         UserRegistrationDto dto = playerDto();
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(true);
 
-        assertThatThrownBy(() -> authService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.registerUser(dto))
             .isInstanceOf(RegisterException.class)
             .hasMessage("Uživatel s tímto emailem již existuje.")
             .satisfies(ex -> assertThat(((RegisterException) ex).getField()).isEqualTo("email"));
@@ -199,7 +199,7 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(userRepository.existsByNickname(dto.getNickname())).thenReturn(true);
 
-        assertThatThrownBy(() -> authService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.registerUser(dto))
             .isInstanceOf(RegisterException.class)
             .hasMessage("Uživatel s tímto uživatelským jménem již existuje.")
             .satisfies(ex -> assertThat(((RegisterException) ex).getField()).isEqualTo("nickname"));
@@ -218,7 +218,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode(any())).thenReturn("encoded");
         when(roleRepository.findByName(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.RegisterUser(dto))
+        assertThatThrownBy(() -> authService.registerUser(dto))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("PLAYER");
 
@@ -236,8 +236,9 @@ class AuthServiceTest {
         when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(true);
         when(jwtService.GenerateToken(eq(42L), anyList())).thenReturn("jwt-token-xyz");
 
-        AuthResponseDto result = authService.LoginUser(dto);
+        AuthResponseDto result = authService.loginUser(dto);
 
+        assertThat(result.getUserId()).isEqualTo(42L);
         assertThat(result.getToken()).isEqualTo("jwt-token-xyz");
         assertThat(result.getMessage()).isEqualTo("Uživatel přihlášen.");
         verify(jwtService).GenerateToken(eq(42L), argThat(roleNames ->
@@ -253,7 +254,7 @@ class AuthServiceTest {
 
         when(userRepository.findByNickname("hrac1")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.LoginUser(dto))
+        assertThatThrownBy(() -> authService.loginUser(dto))
             .isInstanceOf(BadCredentialsException.class)
             .hasMessage("Špatné jméno nebo heslo.");
 
@@ -269,7 +270,7 @@ class AuthServiceTest {
         when(userRepository.findByNickname("hrac1")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(false);
 
-        assertThatThrownBy(() -> authService.LoginUser(dto))
+        assertThatThrownBy(() -> authService.loginUser(dto))
             .isInstanceOf(BadCredentialsException.class)
             .hasMessage("Špatné jméno nebo heslo.");
 

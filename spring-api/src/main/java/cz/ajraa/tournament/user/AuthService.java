@@ -22,7 +22,7 @@ class AuthService {
     private final JwtService jwtService;
 
     @Transactional
-    public AuthResponseDto RegisterUser(UserRegistrationDto dto) throws RegisterException {
+    public AuthResponseDto registerUser(UserRegistrationDto dto) throws RegisterException {
         if (userRepository.existsByEmail(dto.getEmail())) throw new RegisterException("email", "Uživatel s tímto emailem již existuje.");
         if (userRepository.existsByNickname(dto.getNickname())) throw new RegisterException("nickname", "Uživatel s tímto uživatelským jménem již existuje.");
 
@@ -57,7 +57,7 @@ class AuthService {
         return new AuthResponseDto(savedUser.getUserId(), "Registrace proběhla úspěšně");
     }
 
-    public AuthResponseDto LoginUser(LoginDto dto) {
+    public AuthResponseDto loginUser(LoginDto dto) {
         User user = userRepository.findByNickname(dto.getNickname())
                 .orElseThrow(() -> new BadCredentialsException("Špatné jméno nebo heslo."));
 
@@ -69,6 +69,6 @@ class AuthService {
                 .toList();
 
         String token = jwtService.GenerateToken(user.getUserId(), roleNames);
-        return new AuthResponseDto(token, "Uživatel přihlášen.");
+        return new AuthResponseDto(user.getUserId(), token,"Uživatel přihlášen.");
     }
 }

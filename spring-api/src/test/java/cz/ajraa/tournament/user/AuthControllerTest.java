@@ -8,10 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Set;
+
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,13 +30,16 @@ class AuthControllerTest {
     @Mock
     private AuthService authService;
 
+    @Mock
+    private UserService userService;
+
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-            .standaloneSetup(new AuthController(authService))
+            .standaloneSetup(new AuthController(authService, userService))
             .setControllerAdvice(new UserExceptionHandler(), new GlobalExceptionHandler())
             .build();
     }
@@ -69,7 +76,7 @@ class AuthControllerTest {
 
     @Test
     void registerPlayer_validniRequest_vrati201STelemem() throws Exception {
-        when(authService.RegisterUser(any()))
+        when(authService.registerUser(any()))
             .thenReturn(new AuthResponseDto(1L, "Registrace proběhla úspěšně"));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -82,7 +89,7 @@ class AuthControllerTest {
 
     @Test
     void registerFounder_validniRequest_vrati201() throws Exception {
-        when(authService.RegisterUser(any()))
+        when(authService.registerUser(any()))
             .thenReturn(new AuthResponseDto(2L, "Registrace proběhla úspěšně"));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -168,7 +175,7 @@ class AuthControllerTest {
 
     @Test
     void register_duplicitniEmail_vrati409SPolemEmail() throws Exception {
-        when(authService.RegisterUser(any()))
+        when(authService.registerUser(any()))
             .thenThrow(new RegisterException("email", "Uživatel s tímto emailem již existuje."));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -180,7 +187,7 @@ class AuthControllerTest {
 
     @Test
     void register_duplicitniNickname_vrati409SPolemNickname() throws Exception {
-        when(authService.RegisterUser(any()))
+        when(authService.registerUser(any()))
             .thenThrow(new RegisterException("nickname", "Uživatel s tímto uživatelským jménem již existuje."));
 
         mockMvc.perform(post(REGISTER_URL)
@@ -211,23 +218,30 @@ class AuthControllerTest {
     // ─── login ─────────────────────────────────────────────────────────────
 
     @Test
-    void login_validniRequest_vrati200STokenem() throws Exception {
-        when(authService.LoginUser(any()))
-            .thenReturn(new AuthResponseDto("jwt-token-xyz", "Uživatel přihlášen."));
+    void login_validniRequest_vrati200SUserDtoACookie() throws Exception {
+        when(authService.loginUser(any()))
+            .thenReturn(new AuthResponseDto(1L, "jwt-token-xyz", "Uživatel přihlášen."));
+
+        UserDto userDto = new UserDto();
+        userDto.setUserId(1L);
+        userDto.setNickname("hrac1");
+        userDto.setRoles(Set.of(RoleType.PLAYER));
+        when(userService.me(1L)).thenReturn(userDto);
 
         mockMvc.perform(post(LOGIN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(validLoginDto())))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.token").value("jwt-token-xyz"))
-            .andExpect(jsonPath("$.message").value("Uživatel přihlášen."));
+            .andExpect(jsonPath("$.userId").value(1L))
+            .andExpect(jsonPath("$.nickname").value("hrac1"))
+            .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("jwt=jwt-token-xyz")));
     }
 
     // ─── login chyby ───────────────────────────────────────────────────────
 
     @Test
     void login_spatneUdaje_vrati401SChybou() throws Exception {
-        when(authService.LoginUser(any()))
+        when(authService.loginUser(any()))
             .thenThrow(new BadCredentialsException("Špatné jméno nebo heslo."));
 
         mockMvc.perform(post(LOGIN_URL)
