@@ -9,7 +9,7 @@ CREATE TABLE user_role (
 );
 
 CREATE TABLE team_type (
-    id          SERIAL       PRIMARY KEY,
+    id          BIGSERIAL    PRIMARY KEY,
     code        VARCHAR(50)  NOT NULL UNIQUE,
     description VARCHAR(255)
 );
@@ -46,7 +46,7 @@ CREATE TABLE team (
     name       VARCHAR(100) NOT NULL UNIQUE,
     tag        VARCHAR(10)  NOT NULL UNIQUE,
     rating     INTEGER      NOT NULL DEFAULT 0,
-    type_id    INTEGER      NOT NULL REFERENCES team_type(id),
+    type_id    BIGINT       NOT NULL REFERENCES team_type(id),
     captain_id BIGINT       NOT NULL REFERENCES users(user_id)
 );
 

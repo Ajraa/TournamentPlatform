@@ -14,9 +14,9 @@ public class TeamTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "code", nullable = false, unique = true, length = 50)
-    private TeamType name;
+    private TeamType code;
 }

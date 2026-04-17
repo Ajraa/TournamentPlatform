@@ -74,4 +74,17 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("invalidFields", Map.of(ex.getField(), ex.getMessage()));
         return  problemDetail;
     }
+
+    @ExceptionHandler(ResourceExistsException.class)
+    public ProblemDetail handleResourceExistsException(ResourceExistsException ex) {
+        log.info("Resource již existuje: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Resource již existuje"
+        );
+
+        problemDetail.setProperty("invalidFields", Map.of(ex.getField(), ex.getMessage()));
+        return  problemDetail;
+    }
 }
