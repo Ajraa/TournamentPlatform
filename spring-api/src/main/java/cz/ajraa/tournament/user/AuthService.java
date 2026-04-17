@@ -20,6 +20,7 @@ class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserService userService;
 
     @Transactional
     public AuthResponseDto registerUser(UserRegistrationDto dto) throws RegisterException {
@@ -57,7 +58,7 @@ class AuthService {
         return new AuthResponseDto(savedUser.getUserId(), "Registrace proběhla úspěšně");
     }
 
-    public AuthResponseDto loginUser(LoginDto dto) {
+    public LoginResult loginUser(LoginDto dto) {
         User user = userRepository.findByNickname(dto.getNickname())
                 .orElseThrow(() -> new BadCredentialsException("Špatné jméno nebo heslo."));
 
@@ -67,8 +68,9 @@ class AuthService {
         List<String> roleNames = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .toList();
+        UserDto userDto = userService.me(user.getUserId());
 
         String token = jwtService.GenerateToken(user.getUserId(), roleNames);
-        return new AuthResponseDto(user.getUserId(), token,"Uživatel přihlášen.");
+        return new LoginResult(token, userDto);
     }
 }

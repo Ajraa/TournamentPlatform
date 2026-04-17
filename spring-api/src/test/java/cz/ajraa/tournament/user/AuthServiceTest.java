@@ -32,6 +32,9 @@ class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -228,19 +231,24 @@ class AuthServiceTest {
     // ─── úspěšný login ─────────────────────────────────────────────────────
 
     @Test
-    void loginUser_spravneUdaje_vratiTokenAZpravu() {
+    void loginUser_spravneUdaje_vratiLoginResult() {
         LoginDto dto = loginDto();
         User user = userWithPassword("hrac1", "hashedPassword", RoleType.PLAYER);
+
+        UserDto userDto = new UserDto();
+        userDto.setUserId(42L);
+        userDto.setNickname("hrac1");
 
         when(userRepository.findByNickname("hrac1")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("heslo123", "hashedPassword")).thenReturn(true);
         when(jwtService.GenerateToken(eq(42L), anyList())).thenReturn("jwt-token-xyz");
+        when(userService.me(42L)).thenReturn(userDto);
 
-        AuthResponseDto result = authService.loginUser(dto);
+        LoginResult result = authService.loginUser(dto);
 
-        assertThat(result.getUserId()).isEqualTo(42L);
-        assertThat(result.getToken()).isEqualTo("jwt-token-xyz");
-        assertThat(result.getMessage()).isEqualTo("Uživatel přihlášen.");
+        assertThat(result.token()).isEqualTo("jwt-token-xyz");
+        assertThat(result.userDto().getUserId()).isEqualTo(42L);
+        assertThat(result.userDto().getNickname()).isEqualTo("hrac1");
         verify(jwtService).GenerateToken(eq(42L), argThat(roleNames ->
             roleNames.size() == 1 && roleNames.contains("PLAYER")
         ));

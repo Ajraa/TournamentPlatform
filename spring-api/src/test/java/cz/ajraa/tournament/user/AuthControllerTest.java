@@ -30,16 +30,13 @@ class AuthControllerTest {
     @Mock
     private AuthService authService;
 
-    @Mock
-    private UserService userService;
-
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-            .standaloneSetup(new AuthController(authService, userService))
+            .standaloneSetup(new AuthController(authService))
             .setControllerAdvice(new UserExceptionHandler(), new GlobalExceptionHandler())
             .build();
     }
@@ -219,14 +216,13 @@ class AuthControllerTest {
 
     @Test
     void login_validniRequest_vrati200SUserDtoACookie() throws Exception {
-        when(authService.loginUser(any()))
-            .thenReturn(new AuthResponseDto(1L, "jwt-token-xyz", "Uživatel přihlášen."));
-
         UserDto userDto = new UserDto();
         userDto.setUserId(1L);
         userDto.setNickname("hrac1");
         userDto.setRoles(Set.of(RoleType.PLAYER));
-        when(userService.me(1L)).thenReturn(userDto);
+
+        when(authService.loginUser(any()))
+            .thenReturn(new LoginResult("jwt-token-xyz", userDto));
 
         mockMvc.perform(post(LOGIN_URL)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 class AuthController {
 
     private final AuthService authService;
-    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> registerUser(@Valid @RequestBody UserRegistrationDto dto) {
@@ -24,10 +23,9 @@ class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> loginUser(@Valid @RequestBody LoginDto dto) {
-        AuthResponseDto authDto = authService.loginUser(dto);
-        UserDto userDto = userService.me(authDto.getUserId());
+        LoginResult loginResult = authService.loginUser(dto);
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", authDto.getToken())
+        ResponseCookie cookie = ResponseCookie.from("jwt", loginResult.token())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -37,6 +35,6 @@ class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(userDto);
+                .body(loginResult.userDto());
     }
 }
