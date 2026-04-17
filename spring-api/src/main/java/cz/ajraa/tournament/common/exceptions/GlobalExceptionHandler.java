@@ -17,7 +17,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail HandleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.warn("Chyba validace", ex);
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -38,16 +38,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ProblemDetail HandleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+    public ProblemDetail handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
         return ProblemDetail.forStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(Exception.class)
-    public ProblemDetail HandleAllOtherExeptions(Exception ex) {
+    public ProblemDetail handleAllOtherExeptions(Exception ex) {
         log.error("Došlo k neohandlované chybě", ex);
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Došlo k neočekávané chybě na serveru."
+        );
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
+        log.error("Zdroj nenalezen: {}", ex.getMessage());
+
+        return ProblemDetail.forStatusAndDetail(
+              HttpStatus.NOT_FOUND,
+              ex.getMessage()
         );
     }
 }

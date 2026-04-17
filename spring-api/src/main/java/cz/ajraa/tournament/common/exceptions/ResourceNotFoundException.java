@@ -1,0 +1,7 @@
+package cz.ajraa.tournament.common.exceptions;
+
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}

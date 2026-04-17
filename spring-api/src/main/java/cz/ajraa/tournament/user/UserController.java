@@ -16,9 +16,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<String> me(Authentication authentication)
-    {
+    public ResponseEntity<UserDto> me(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok().body(userService.me(userId));
     }
 }
