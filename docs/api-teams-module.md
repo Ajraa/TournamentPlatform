@@ -20,16 +20,18 @@ Vytvoří nový tým. Zakladatel se automaticky stává kapitánem a prvním čl
 ```json
 {
   "name": "Team Avarice",
-  "tag": "AVR"
+  "tag": "AVR",
+  "type": "TEAM"
 }
 ```
 
 #### Field reference
 
-| Field  | Type   | Constraints                    |
-|--------|--------|--------------------------------|
-| `name` | string | Required, unique               |
-| `tag`  | string | Required, unique, max 10 znaků |
+| Field  | Type   | Constraints                           |
+|--------|--------|---------------------------------------|
+| `name` | string | Required, unique                      |
+| `tag`  | string | Required, unique, max 10 znaků        |
+| `type` | string | Required, `TEAM` or `SOLO`            |
 
 **Response body** (`201`) — `TeamDto`
 
