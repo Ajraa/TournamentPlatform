@@ -1,4 +1,4 @@
-package cz.ajraa.tournament.team;
+package cz.ajraa.tournament.team.internal;
 
 import jakarta.persistence.*;
 import lombok.Getter;

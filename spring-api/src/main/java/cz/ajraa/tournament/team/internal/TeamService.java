@@ -1,7 +1,7 @@
-package cz.ajraa.tournament.team;
+package cz.ajraa.tournament.team.internal;
 
 import cz.ajraa.tournament.common.exceptions.ResourceExistsException;
-import lombok.AllArgsConstructor;
+import cz.ajraa.tournament.user.UserFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamTypeRepository teamTypeRepository;
+    private final UserFacade userFacade;
 
     CreateTeamResponse createTeam(CreateTeamDto dto, Long captainId) {
         if (teamRepository.existsByName(dto.getName())) throw new ResourceExistsException("name", "Tým s tímto jménem již existuje");
@@ -25,7 +26,7 @@ class TeamService {
         team.setTag(dto.getTag());
         team.setType(teamType);
         team.setCaptainId(captainId);
-        team.setRating(0); // Rating kapitána
+        team.setRating(userFacade.getCaptainRating(captainId));
 
         Team createdTeam = teamRepository.save(team);
 
