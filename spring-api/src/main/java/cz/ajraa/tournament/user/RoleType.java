@@ -1,6 +1,6 @@
 package cz.ajraa.tournament.user;
 
-public enum RoleType {
+enum RoleType {
     PLAYER,
     FOUNDER,
     ADMIN

@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @ValidUserRegistration
-public class UserRegistrationDto {
+class UserRegistrationDto {
 
     @NotBlank(message = "Email nesmí být prázdný.")
     @Email(message = "Neplatný formát emailu")

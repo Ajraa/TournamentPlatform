@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CreateTeamResponse {
+class CreateTeamResponse {
     private Long teamId;
     private String message;
 }

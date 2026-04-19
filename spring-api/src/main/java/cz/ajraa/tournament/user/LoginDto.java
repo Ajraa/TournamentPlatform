@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class LoginDto {
+class LoginDto {
     @NotBlank(message = "Nicmane nesmí být prázdný.")
     private String nickname;
 

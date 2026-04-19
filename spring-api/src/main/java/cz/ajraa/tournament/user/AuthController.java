@@ -16,13 +16,13 @@ class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDto> registerUser(@Valid @RequestBody UserRegistrationDto dto) {
+     ResponseEntity<AuthResponseDto> registerUser(@Valid @RequestBody UserRegistrationDto dto) {
         AuthResponseDto authDto = authService.registerUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(authDto);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> loginUser(@Valid @RequestBody LoginDto dto) {
+    ResponseEntity<UserDto> loginUser(@Valid @RequestBody LoginDto dto) {
         LoginResult loginResult = authService.loginUser(dto);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", loginResult.token())

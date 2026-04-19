@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice(basePackages = "cz.ajraa.tournament.user")
-public class UserExceptionHandler {
+class UserExceptionHandler {
 
     @ExceptionHandler(RegisterException.class)
     public ProblemDetail HandleRegisterException(RegisterException ex) {

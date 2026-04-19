@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CreateTeamDto {
+class CreateTeamDto {
 
     @NotBlank(message = "Jméno nesmí být prázdný.")
     private String name;

@@ -1,6 +1,6 @@
 package cz.ajraa.tournament.team;
 
-public enum TeamType {
+enum TeamType {
     TEAM,
     SOLO
 }

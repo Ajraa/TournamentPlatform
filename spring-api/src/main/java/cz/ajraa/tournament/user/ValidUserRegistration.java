@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = UserRegistrationDtoValidator.class)
-public @interface ValidUserRegistration {
+@interface ValidUserRegistration {
     String message() default "Neplatná registrační data.";
 
     Class<?>[] groups() default {};

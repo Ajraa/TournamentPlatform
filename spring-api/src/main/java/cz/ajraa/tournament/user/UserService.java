@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

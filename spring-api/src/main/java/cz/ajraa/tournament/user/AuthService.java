@@ -23,7 +23,7 @@ class AuthService {
     private final UserService userService;
 
     @Transactional
-    public AuthResponseDto registerUser(UserRegistrationDto dto) throws RegisterException {
+    AuthResponseDto registerUser(UserRegistrationDto dto) throws RegisterException {
         if (userRepository.existsByEmail(dto.getEmail())) throw new RegisterException("email", "Uživatel s tímto emailem již existuje.");
         if (userRepository.existsByNickname(dto.getNickname())) throw new RegisterException("nickname", "Uživatel s tímto uživatelským jménem již existuje.");
 
@@ -58,7 +58,7 @@ class AuthService {
         return new AuthResponseDto(savedUser.getUserId(), "Registrace proběhla úspěšně");
     }
 
-    public LoginResult loginUser(LoginDto dto) {
+    LoginResult loginUser(LoginDto dto) {
         User user = userRepository.findByNickname(dto.getNickname())
                 .orElseThrow(() -> new BadCredentialsException("Špatné jméno nebo heslo."));
 

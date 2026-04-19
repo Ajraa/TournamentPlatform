@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class UpdateUserDto {
+class UpdateUserDto {
     private String firstName;
     private String lastName;
     private String street;
