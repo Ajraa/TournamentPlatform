@@ -28,6 +28,6 @@ public class TeamService {
 
         Team createdTeam = teamRepository.save(team);
 
-        return new CreateTeamResponse(team.getTeamId(), "Tým byl vytvořen");
+        return new CreateTeamResponse(createdTeam.getTeamId(), "Tým byl vytvořen");
     }
 }
