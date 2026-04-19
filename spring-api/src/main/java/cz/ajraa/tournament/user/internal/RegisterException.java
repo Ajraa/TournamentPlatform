@@ -1,4 +1,4 @@
-package cz.ajraa.tournament.user;
+package cz.ajraa.tournament.user.internal;
 
 import lombok.Getter;
 

@@ -1,8 +1,6 @@
-package cz.ajraa.tournament.user;
+package cz.ajraa.tournament.user.internal;
 
 import lombok.Data;
-
-import java.util.Set;
 
 @Data
 class UpdateUserDto {

@@ -1,4 +1,4 @@
-package cz.ajraa.tournament.user;
+package cz.ajraa.tournament.user.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.ajraa.tournament.common.exceptions.GlobalExceptionHandler;

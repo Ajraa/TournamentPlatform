@@ -1,4 +1,4 @@
-package cz.ajraa.tournament.user;
+package cz.ajraa.tournament.user.internal;
 
 import cz.ajraa.tournament.common.exceptions.IllegalUpdateException;
 import cz.ajraa.tournament.common.exceptions.ResourceNotFoundException;
