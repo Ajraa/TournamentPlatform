@@ -17,7 +17,7 @@ class TeamService {
     CreateTeamResponse createTeam(CreateTeamDto dto, Long captainId) {
         if (teamRepository.existsByName(dto.getName())) throw new ResourceExistsException("name", "Tým s tímto jménem již existuje");
 
-        TeamTypeEntity teamType = teamTypeRepository.findByCode(dto.getType().name())
+        TeamTypeEntity teamType = teamTypeRepository.findByCode(dto.getType())
                 .orElseThrow(() -> new IllegalStateException("Role %s neexistuje".formatted(dto.getType())));
 
         Team team = new Team();
