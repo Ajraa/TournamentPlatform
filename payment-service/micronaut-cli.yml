@@ -1,0 +1,6 @@
+applicationType: messaging
+defaultPackage: cz.ajraa.tournament
+testFramework: junit
+sourceLanguage: java
+buildTool: gradle_kotlin
+features: [app-name, data, data-jpa, gradle, http-client, java, java-application, jdbc-hikari, junit, logback, lombok, micronaut-build, postgres, properties, rabbitmq, readme, serialization-jackson, shade, test-resources, validation]

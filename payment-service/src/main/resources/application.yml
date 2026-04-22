@@ -1,0 +1,22 @@
+micronaut:
+  application:
+    name: payment-service
+
+datasources:
+  default:
+    db-type: postgres
+    dialect: POSTGRES
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/tournament-platform
+    username: postgres
+    password: root
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: validate
+
+rabbitmq:
+  uri: amqp://guest:guest@localhost:5672
