@@ -57,7 +57,7 @@ micronaut {
         annotations("cz.ajraa.tournament.*")
     }
     testResources {
-        sharedServer = true
+        enabled.set(false)
     }
 }
 
