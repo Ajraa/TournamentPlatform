@@ -58,6 +58,7 @@ class AuthService {
         return new AuthResponseDto(savedUser.getUserId(), "Registrace proběhla úspěšně");
     }
 
+    @Transactional
     LoginResult loginUser(LoginDto dto) {
         User user = userRepository.findByNickname(dto.getNickname())
                 .orElseThrow(() -> new BadCredentialsException("Špatné jméno nebo heslo."));

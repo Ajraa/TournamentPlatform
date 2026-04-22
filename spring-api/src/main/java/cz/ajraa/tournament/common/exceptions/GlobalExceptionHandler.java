@@ -3,6 +3,7 @@ package cz.ajraa.tournament.common.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -86,5 +87,15 @@ public class GlobalExceptionHandler {
 
         problemDetail.setProperty("invalidFields", Map.of(ex.getField(), ex.getMessage()));
         return  problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.warn("Špatný formát požadavku (chybějící/neplatný JSON): {}", ex.getMessage());
+
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Chybí tělo požadavku nebo má neplatný formát JSONu."
+        );
     }
 }

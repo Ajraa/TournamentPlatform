@@ -20,6 +20,9 @@ services:
     ports:
       - "5672:5672"   # Port pro komunikaci aplikací (Spring/Micronaut)
       - "15672:15672" # Webové rozhraní (Admin panel)
+    volumes:
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     restart: unless-stopped
 
 volumes:
